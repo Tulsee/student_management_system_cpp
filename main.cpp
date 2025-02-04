@@ -16,7 +16,6 @@
 #define CYAN    "\033[36m"
 #define RED     "\033[31m"
 
-
 void loadingEffect(const std::string& message) {
     std::cout << YELLOW << message;
     for (int i = 0; i < 3; i++) {
@@ -44,7 +43,8 @@ void displayMenu() {
     std::cout << GREEN << "1. Add Student\n";
     std::cout << "2. Fetch All Students\n";
     std::cout << "3. Update Student\n";
-    std::cout << "4. Exit\n" << RESET;
+    std::cout << "4. Delete Student\n";
+    std::cout << "5. Exit\n" << RESET;
     std::cout << BOLD << "Enter your choice: " << RESET;
 }
 
@@ -110,11 +110,11 @@ int main() {
             std::cout << "Press ENTER to continue...";
             std::cin.ignore();
             std::cin.get();
-        }
+        } 
         else if (choice == 3) {
             int id = getValidIntInput("✏️ Enter Student ID to update: ");
             std::string name, department;
-            int age;
+            int age = -1;
 
             std::cout << BOLD << CYAN << "Enter new name (leave empty to keep unchanged): " << RESET;
             std::getline(std::cin, name);
@@ -127,19 +127,19 @@ int main() {
             std::getline(std::cin, department);
 
             loadingEffect("Updating student details");
-            if (Student::updateStudent(id, name, age, department)) {
-                std::cout << GREEN << "✅ Student updated successfully!\n" << RESET;
-            } else {
-                std::cout << RED << "❌ Student update failed! Check if the ID exists.\n" << RESET;
-            }
-            std::this_thread::sleep_for(std::chrono::seconds(2));
+            Student::updateStudent(id, name, age, department);
         } 
         else if (choice == 4) {
+            int id = getValidIntInput("🗑️ Enter Student ID to delete: ");
+            loadingEffect("Deleting student");
+            Student::deleteStudent(id);
+        } 
+        else if (choice == 5) {
             std::cout << BOLD << "👋 Exiting the program...\n" << RESET;
             break;
         } 
         else {
-            std::cout << RED << "❌ Invalid choice! Please enter 1, 2, 3, or 4.\n" << RESET;
+            std::cout << RED << "❌ Invalid choice! Please enter a valid option.\n" << RESET;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
     }

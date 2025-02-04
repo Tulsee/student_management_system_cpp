@@ -10,32 +10,15 @@ void Student::save() {
     Database *db = Database::getInstance();
     MYSQL *conn  = db->getConnection();
 
-    const char *query = "INSERT INTO students (id, name, age, department) VALUES (?, ?, ?, ?)";
-    MYSQL_STMT *stmt = mysql_stmt_init(conn);
-    if (!stmt) {
-        std::cout << "❌ Could not initialize MYSQL statement" << std::endl;
-        return;
+    std::stringstream query;
+    query << "INSERT INTO students (id, name, age, department) VALUES ("
+          << id << ", '" << name << "', " << age << ", '" << department << "')";
+
+    if (db->executeQuery(query.str())) {
+        std::cout << "✅ Student saved successfully!\n";
+    } else {
+        std::cout << "❌ Failed to save student!\n";
     }
-
-    mysql_stmt_prepare(stmt, query, strlen(query));
-
-    MYSQL_BIND bind[4] = {0};
-    bind[0].buffer_type = MYSQL_TYPE_LONG;
-    bind[0].buffer = &id;
-    bind[1].buffer_type = MYSQL_TYPE_STRING;
-    bind[1].buffer = (void*)name.c_str();
-    bind[1].buffer_length = name.length();
-    bind[2].buffer_type = MYSQL_TYPE_LONG;
-    bind[2].buffer = &age;
-    bind[3].buffer_type = MYSQL_TYPE_STRING;
-    bind[3].buffer = (void*)department.c_str();
-    bind[3].buffer_length = department.length();
-
-    mysql_stmt_bind_param(stmt, bind);
-    mysql_stmt_execute(stmt);
-    mysql_stmt_close(stmt);
-
-    std::cout << "✅ Student saved successfully" << std::endl;
 }
 
 void Student::fetchAll() {
@@ -57,39 +40,22 @@ void Student::fetchAll() {
 
 bool Student::updateStudent(int id, const std::string& name, int age, const std::string& department) {
     Database* db = Database::getInstance();
-    MYSQL* conn = db->getConnection();
-    
     std::stringstream query;
     query << "UPDATE students SET ";
-
-    bool hasPrev = false;
-    if (!name.empty()) {
-        query << "name = '" << name << "'";
-        hasPrev = true;
-    }
-    if (age != -1) {
-        if (hasPrev) query << ", ";
-        query << "age = " << age;
-        hasPrev = true;
-    }
-    if (!department.empty()) {
-        if (hasPrev) query << ", ";
-        query << "department = '" << department << "'";
-    }
-
+    
+    if (!name.empty()) query << "name = '" << name << "', ";
+    if (age != -1) query << "age = " << age << ", ";
+    if (!department.empty()) query << "department = '" << department << "', ";
+    
+    query.seekp(-2, query.cur);
     query << " WHERE id = " << id;
 
-    if (!hasPrev) {
-        std::cout << "❌ No changes provided for update!\n";
-        return false;
-    }
+    return db->executeQuery(query.str());
+}
 
-    bool success = db->executeQuery(query.str());
-    if (success) {
-        std::cout << "✅ Student updated successfully!\n";
-    } else {
-        std::cout << "❌ Student update failed! Check if the ID exists.\n";
-    }
-
-    return success;
+bool Student::deleteStudent(int id) {
+    Database* db = Database::getInstance();
+    std::stringstream query;
+    query << "DELETE FROM students WHERE id = " << id;
+    return db->executeQuery(query.str());
 }
