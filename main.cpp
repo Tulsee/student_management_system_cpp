@@ -43,8 +43,25 @@ void displayMenu() {
     std::cout << RESET;
     std::cout << GREEN << "1. Add Student\n";
     std::cout << "2. Fetch All Students\n";
-    std::cout << "3. Exit\n" << RESET;
+    std::cout << "3. Update Student\n";
+    std::cout << "4. Exit\n" << RESET;
     std::cout << BOLD << "Enter your choice: " << RESET;
+}
+
+int getValidIntInput(const std::string& prompt) {
+    int value;
+    while (true) {
+        std::cout << BOLD << CYAN << prompt << RESET;
+        std::cin >> value;
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(1000, '\n');
+            std::cout << RED << "❌ Invalid input! Please enter a valid number.\n" << RESET;
+        } else {
+            std::cin.ignore();
+            return value;
+        }
+    }
 }
 
 int main() {
@@ -93,13 +110,36 @@ int main() {
             std::cout << "Press ENTER to continue...";
             std::cin.ignore();
             std::cin.get();
-        } 
+        }
         else if (choice == 3) {
+            int id = getValidIntInput("✏️ Enter Student ID to update: ");
+            std::string name, department;
+            int age;
+
+            std::cout << BOLD << CYAN << "Enter new name (leave empty to keep unchanged): " << RESET;
+            std::getline(std::cin, name);
+
+            std::cout << BOLD << CYAN << "Enter new age (or -1 to keep unchanged): " << RESET;
+            std::cin >> age;
+            std::cin.ignore();
+
+            std::cout << BOLD << CYAN << "Enter new department (leave empty to keep unchanged): " << RESET;
+            std::getline(std::cin, department);
+
+            loadingEffect("Updating student details");
+            if (Student::updateStudent(id, name, age, department)) {
+                std::cout << GREEN << "✅ Student updated successfully!\n" << RESET;
+            } else {
+                std::cout << RED << "❌ Student update failed! Check if the ID exists.\n" << RESET;
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        } 
+        else if (choice == 4) {
             std::cout << BOLD << "👋 Exiting the program...\n" << RESET;
             break;
         } 
         else {
-            std::cout << RED << "❌ Invalid choice! Please enter 1, 2, or 3.\n" << RESET;
+            std::cout << RED << "❌ Invalid choice! Please enter 1, 2, 3, or 4.\n" << RESET;
             std::this_thread::sleep_for(std::chrono::seconds(2));
         }
     }
